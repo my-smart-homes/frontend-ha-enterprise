@@ -165,6 +165,8 @@ class HaChangePasswordCard extends LitElement {
       this._loading = false;
     }
 
+    // TODO: call firebase function to update password
+
     this._statusMsg = this.hass.localize(
       "ui.panel.profile.change_password.success"
     );
