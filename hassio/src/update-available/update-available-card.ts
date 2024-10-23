@@ -52,9 +52,9 @@ declare global {
 }
 
 const SUPERVISOR_UPDATE_NAMES = {
-  core: "Home Assistant Core",
-  os: "Home Assistant Operating System",
-  supervisor: "Home Assistant Supervisor",
+  core: "My Smart Homes Assistant Core",
+  os: "My Smart Homes Assistant Operating System",
+  supervisor: "My Smart Homes Assistant Supervisor",
 };
 
 type updateType = "os" | "supervisor" | "core" | "addon";
@@ -68,20 +68,20 @@ const changelogUrl = (
   }
   if (entry === "core") {
     return version.includes("dev")
-      ? "https://github.com/home-assistant/core/commits/dev"
+      ? "https://github.com/my-smart-homes/core/commits/dev"
       : version.includes("b")
-        ? "https://next.home-assistant.io/latest-release-notes/"
-        : "https://www.home-assistant.io/latest-release-notes/";
+        ? "https://next.my-smart-homes.io/latest-release-notes/"
+        : "https://www.my-smart-homes.io/latest-release-notes/";
   }
   if (entry === "os") {
     return version.includes("dev")
-      ? "https://github.com/home-assistant/operating-system/commits/dev"
-      : `https://github.com/home-assistant/operating-system/releases/tag/${version}`;
+      ? "https://github.com/my-smart-homes/operating-system/commits/dev"
+      : `https://github.com/my-smart-homes/operating-system/releases/tag/${version}`;
   }
   if (entry === "supervisor") {
     return version.includes("dev")
-      ? "https://github.com/home-assistant/supervisor/commits/main"
-      : `https://github.com/home-assistant/supervisor/releases/tag/${version}`;
+      ? "https://github.com/my-smart-homes/supervisor/commits/main"
+      : `https://github.com/my-smart-homes/supervisor/releases/tag/${version}`;
   }
   return undefined;
 };

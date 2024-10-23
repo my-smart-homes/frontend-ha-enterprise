@@ -12,7 +12,7 @@ if [ -z "${DEVCONTAINER}" ]; then
 fi
 
 # Default to installing (or upgrading to) dev branch
-coreURL="https://github.com/home-assistant/core.git"
+coreURL="https://github.com/my-smart-homes/core.git"
 ref="dev"
 
 while getopts "hr:s" opt; do

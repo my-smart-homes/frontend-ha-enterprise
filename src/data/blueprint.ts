@@ -93,7 +93,7 @@ export const getBlueprintSourceType = (
   if (!sourceUrl) {
     return "local";
   }
-  if (sourceUrl.includes("github.com/home-assistant")) {
+  if (sourceUrl.includes("github.com/my-smart-homes")) {
     return "homeassistant";
   }
   return "community";
