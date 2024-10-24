@@ -34,7 +34,7 @@ import { documentationUrl } from "../../../util/documentation-url";
 const JS_TYPE = __BUILD__;
 const JS_VERSION = __VERSION__;
 
-const PAGES = [
+const _PAGES = [
   {
     name: "change_log",
     path: "/latest-release-notes/",
@@ -126,30 +126,34 @@ class HaConfigInfo extends LitElement {
               >
               </ha-logo-svg>
             </a>
-            <p>Home Assistant</p>
+            <p>My Smart Homes</p>
             <ul class="versions">
               <li>
                 <span class="version-label">Core</span>
                 <span class="version">${hass.connection.haVersion}</span>
               </li>
-              ${this._hassioInfo
-                ? html`
-                    <li>
-                      <span class="version-label">Supervisor</span>
-                      <span class="version"
-                        >${this._hassioInfo.supervisor}</span
-                      >
-                    </li>
-                  `
-                : nothing}
-              ${this._osInfo
-                ? html`
-                    <li>
-                      <span class="version-label">Operating System</span>
-                      <span class="version">${this._osInfo.version}</span>
-                    </li>
-                  `
-                : nothing}
+              ${
+                this._hassioInfo
+                  ? html`
+                      <li>
+                        <span class="version-label">Supervisor</span>
+                        <span class="version"
+                          >${this._hassioInfo.supervisor}</span
+                        >
+                      </li>
+                    `
+                  : nothing
+              }
+              ${
+                this._osInfo
+                  ? html`
+                      <li>
+                        <span class="version-label">Operating System</span>
+                        <span class="version">${this._osInfo.version}</span>
+                      </li>
+                    `
+                  : nothing
+              }
               <li>
                 <span class="version-label">
                   ${this.hass.localize(
@@ -173,46 +177,23 @@ class HaConfigInfo extends LitElement {
             </a>
           </ha-card>
 
-          <ha-card outlined class="pages">
-            <mwc-list>
-              ${PAGES.map(
-                (page) => html`
-                  <ha-clickable-list-item
-                    graphic="avatar"
-                    openNewTab
-                    href=${documentationUrl(this.hass, page.path)}
-                  >
-                    <div
-                      slot="graphic"
-                      class="icon-background"
-                      .style="background-color: ${page.iconColor}"
-                    >
-                      <ha-svg-icon .path=${page.iconPath}></ha-svg-icon>
-                    </div>
-                    <span>
-                      ${this.hass.localize(
-                        `ui.panel.config.info.items.${page.name}`
+            ${
+              customUiList.length
+                ? html`
+                    <div class="custom-ui">
+                      ${this.hass.localize("ui.panel.config.info.custom_uis")}
+                      ${customUiList.map(
+                        (item) => html`
+                          <div>
+                            <a href=${item.url} target="_blank"> ${item.name}</a
+                            >: ${item.version}
+                          </div>
+                        `
                       )}
-                    </span>
-                  </ha-clickable-list-item>
-                `
-              )}
-            </mwc-list>
-            ${customUiList.length
-              ? html`
-                  <div class="custom-ui">
-                    ${this.hass.localize("ui.panel.config.info.custom_uis")}
-                    ${customUiList.map(
-                      (item) => html`
-                        <div>
-                          <a href=${item.url} target="_blank"> ${item.name}</a>:
-                          ${item.version}
-                        </div>
-                      `
-                    )}
-                  </div>
-                `
-              : nothing}
+                    </div>
+                  `
+                : nothing
+            }
           </ha-card>
         </div>
       </hass-subpage>

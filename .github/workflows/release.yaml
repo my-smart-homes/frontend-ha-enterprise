@@ -73,11 +73,11 @@ jobs:
           version=$(echo "${{ github.ref }}" | awk -F"/" '{print $NF}' )
           echo "my-home-assistant-frontend==$version" > ./requirements.txt
 
-      - name: Build wheels
-        uses: home-assistant/wheels@2024.07.1
-        with:
-          abi: cp312
-          tag: musllinux_1_2
-          arch: amd64
-          wheels-key: ${{ secrets.WHEELS_KEY }}
-          requirements: "requirements.txt"
+      # - name: Build wheels
+      #   uses: home-assistant/wheels@2024.07.1
+      #   with:
+      #     abi: cp312
+      #     tag: musllinux_1_2
+      #     arch: amd64
+      #     wheels-key: ${{ secrets.WHEELS_KEY }}
+      #     requirements: "requirements.txt"
