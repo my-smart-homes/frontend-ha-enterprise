@@ -7147,14 +7147,15 @@
           "appstore": "Download on the App Store"
         },
         "user": {
-          "header": "Create user",
+          "header": "Create permanent user",
           "intro": "Let's get started by creating a user account.",
           "required_field": "Required",
           "data": {
             "name": "Name",
-            "username": "Username",
+            "username": "Email",
             "password": "Password",
-            "password_confirm": "Confirm password"
+            "password_confirm": "Confirm password",
+            "secret_key": "Secret Key"
           },
           "helper": {
             "password": "Choose a strong and unique password. Make sure to save it, so you don't forget it."
