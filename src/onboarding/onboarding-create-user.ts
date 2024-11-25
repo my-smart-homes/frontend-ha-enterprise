@@ -128,14 +128,17 @@ class OnboardingCreateUser extends LitElement {
   private _handleValueChanged(
     ev: ValueChangedEvent<HaFormDataContainer>
   ): void {
-    const nameChanged = ev.detail.value.name !== this._newUser.name;
+    // const nameChanged = ev.detail.value.name !== this._newUser.name;
     const passwordChanged =
       ev.detail.value.password !== this._newUser.password ||
       ev.detail.value.password_confirm !== this._newUser.password_confirm;
     this._newUser = ev.detail.value;
+    // disabled auto email-completing
+    /* 
     if (nameChanged) {
       this._maybePopulateUsername();
     }
+    */
     if (passwordChanged) {
       if (this._formError.password_confirm) {
         this._checkPasswordMatch();
@@ -164,6 +167,8 @@ class OnboardingCreateUser extends LitElement {
     }
   }
 
+  // disabled auto email-completing
+  /*
   private _maybePopulateUsername(): void {
     if (!this._newUser.name || this._newUser.name === this._newUser.username) {
       return;
@@ -174,6 +179,7 @@ class OnboardingCreateUser extends LitElement {
       this._newUser.username = parts[0].toLowerCase();
     }
   }
+  */
 
   private async _submitForm(ev): Promise<void> {
     ev.preventDefault();
