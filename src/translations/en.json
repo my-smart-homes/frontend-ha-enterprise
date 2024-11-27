@@ -6730,7 +6730,11 @@
               },
               "error": {
                 "invalid_auth": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::invalid_auth%]",
-                "invalid_code": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::invalid_code%]"
+                "invalid_code": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::invalid_code%]",
+                "subscription_over": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::subscription_over%]",
+                "no_internet": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::no_internet%]",
+                "server_denied": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::server_denied%]",
+                "server_crash": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::server_crash%]"
               },
               "abort": {
                 "login_expired": "[%key:ui::panel::page-authorize::form::providers::homeassistant::abort::login_expired%]"
@@ -6753,7 +6757,11 @@
               },
               "error": {
                 "invalid_auth": "Invalid username or password",
-                "invalid_code": "Invalid authentication code"
+                "invalid_code": "Invalid authentication code",
+                "subscription_over": "Your subscription is over.",
+                "no_internet": "No internet. For Login, you need an active internet connection.",
+                "server_denied": "Server denied login, bad request.",
+                "server_crash": "Internal Server Error"
               },
               "abort": {
                 "login_expired": "Session expired, please log in again."
