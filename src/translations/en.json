@@ -6759,7 +6759,7 @@
                 "invalid_auth": "Invalid username or password",
                 "invalid_code": "Invalid authentication code",
                 "subscription_over": "Your subscription is over.",
-                "no_internet": "No internet. For Login, you need an active internet connection.",
+                "no_internet": "No internet. For login, you need an active internet connection.",
                 "server_denied": "Server denied login, bad request.",
                 "server_crash": "Internal Server Error"
               },
