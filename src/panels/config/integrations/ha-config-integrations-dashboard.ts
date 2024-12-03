@@ -74,6 +74,7 @@ import type { HaIntegrationCard } from "./ha-integration-card";
 import "./ha-integration-overflow-menu";
 import { showAddIntegrationDialog } from "./show-add-integration-dialog";
 import { fetchEntitySourcesWithCache } from "../../../data/entity_sources";
+import { fetchDeviceCountLimit } from "../../../common/util/get-device-limit";
 
 export interface ConfigEntryExtended extends Omit<ConfigEntry, "entry_id"> {
   entry_id?: string;
@@ -665,7 +666,45 @@ class HaConfigIntegrationsDashboard extends SubscribeMixin(LitElement) {
     this._fetchManifests();
   }
 
-  private _createFlow() {
+  private async _createFlow() {
+    // check subscription device limit
+    if (this.configEntries) {
+      const deviceCountByDomain: { [domain: string]: number } = {};
+
+      this.configEntries.forEach((entry) => {
+        const domainDevices = Object.values(this.hass.devices || {}).filter(
+          (device) => device.config_entries.includes(entry.entry_id || "")
+        );
+
+        if (!deviceCountByDomain[entry.domain]) {
+          deviceCountByDomain[entry.domain] = 0;
+        }
+        deviceCountByDomain[entry.domain] += domainDevices.length;
+      });
+
+      // Calculate total device count
+      const totalDeviceCount = Object.values(deviceCountByDomain).reduce(
+        (sum, count) => sum + count,
+        0
+      );
+      const limit = await fetchDeviceCountLimit(this.hass);
+      if (limit !== undefined) {
+        if (totalDeviceCount >= limit) {
+          showAlertDialog(this, {
+            title: "Sorry",
+            text: "Maximum devices reached. Remove one to add a new device.",
+          });
+          return;
+        }
+      } else {
+        showAlertDialog(this, {
+          title: "Sorry",
+          text: "Something went wrong with your subscription.",
+        });
+        return;
+      }
+    }
+
     showAddIntegrationDialog(this, {
       initialFilter: this._filter,
     });
