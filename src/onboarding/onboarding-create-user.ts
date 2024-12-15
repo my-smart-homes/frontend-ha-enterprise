@@ -66,7 +66,9 @@ class OnboardingCreateUser extends LitElement {
     return html`
       <h1>${this.localize("ui.panel.page-onboarding.user.header")}</h1>
       <p>${this.localize("ui.panel.page-onboarding.user.intro")}</p>
-
+      ${this._loading
+        ? html`<onboarding-loading margin="5px auto"></onboarding-loading>`
+        : ""}
       ${this._errorMsg
         ? html`<ha-alert alert-type="error">${this._errorMsg}</ha-alert>`
         : ""}
@@ -183,6 +185,7 @@ class OnboardingCreateUser extends LitElement {
 
   private async _submitForm(ev): Promise<void> {
     ev.preventDefault();
+
     this._loading = true;
     this._errorMsg = "";
 

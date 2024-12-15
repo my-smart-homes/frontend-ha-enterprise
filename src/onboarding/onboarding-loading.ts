@@ -1,10 +1,13 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
-import { customElement } from "lit/decorators";
+import { customElement, property } from "lit/decorators";
 
 @customElement("onboarding-loading")
 class OnboardingLoading extends LitElement {
+  @property({ type: String })
+  margin: string = "60px auto";
+
   protected render(): TemplateResult {
-    return html`<div class="loader"></div>`;
+    return html`<div class="loader" style="margin: ${this.margin};"></div>`;
   }
 
   static get styles(): CSSResultGroup {
