@@ -17,6 +17,7 @@ import { onboardUserStep } from "../data/onboarding";
 import { ValueChangedEvent } from "../types";
 import { onBoardingStyles } from "./styles";
 import { debounce } from "../common/util/debounce";
+import "./onboarding-loading";
 
 const CREATE_USER_SCHEMA: HaFormSchema[] = [
   {
