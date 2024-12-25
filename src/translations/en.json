@@ -6730,7 +6730,11 @@
               },
               "error": {
                 "invalid_auth": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::invalid_auth%]",
-                "invalid_code": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::invalid_code%]"
+                "invalid_code": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::invalid_code%]",
+                "subscription_over": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::subscription_over%]",
+                "no_internet": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::no_internet%]",
+                "server_denied": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::server_denied%]",
+                "server_crash": "[%key:ui::panel::page-authorize::form::providers::homeassistant::error::server_crash%]"
               },
               "abort": {
                 "login_expired": "[%key:ui::panel::page-authorize::form::providers::homeassistant::abort::login_expired%]"
@@ -6753,7 +6757,11 @@
               },
               "error": {
                 "invalid_auth": "Invalid username or password",
-                "invalid_code": "Invalid authentication code"
+                "invalid_code": "Invalid authentication code",
+                "subscription_over": "Your subscription is over.",
+                "no_internet": "No internet. For login, you need an active internet connection.",
+                "server_denied": "Server denied login, bad request.",
+                "server_crash": "Internal Server Error"
               },
               "abort": {
                 "login_expired": "Session expired, please log in again."
@@ -7147,14 +7155,15 @@
           "appstore": "Download on the App Store"
         },
         "user": {
-          "header": "Create user",
+          "header": "Create permanent user",
           "intro": "Let's get started by creating a user account.",
           "required_field": "Required",
           "data": {
             "name": "Name",
-            "username": "Username",
+            "username": "Email",
             "password": "Password",
-            "password_confirm": "Confirm password"
+            "password_confirm": "Confirm password",
+            "secret_key": "Secret Key"
           },
           "helper": {
             "password": "Choose a strong and unique password. Make sure to save it, so you don't forget it."

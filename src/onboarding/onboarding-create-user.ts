@@ -17,6 +17,7 @@ import { onboardUserStep } from "../data/onboarding";
 import { ValueChangedEvent } from "../types";
 import { onBoardingStyles } from "./styles";
 import { debounce } from "../common/util/debounce";
+import "./onboarding-loading";
 
 const CREATE_USER_SCHEMA: HaFormSchema[] = [
   {
@@ -27,7 +28,7 @@ const CREATE_USER_SCHEMA: HaFormSchema[] = [
   {
     name: "username",
     required: true,
-    selector: { text: { autocomplete: "username" } },
+    selector: { text: { type: "email", autocomplete: "username" } },
   },
   {
     name: "password",
@@ -38,6 +39,11 @@ const CREATE_USER_SCHEMA: HaFormSchema[] = [
     name: "password_confirm",
     required: true,
     selector: { text: { type: "password", autocomplete: "new-password" } },
+  },
+  {
+    name: "secret_key",
+    required: true,
+    selector: { text: { autocomplete: "off" } },
   },
 ];
 
@@ -61,7 +67,9 @@ class OnboardingCreateUser extends LitElement {
     return html`
       <h1>${this.localize("ui.panel.page-onboarding.user.header")}</h1>
       <p>${this.localize("ui.panel.page-onboarding.user.intro")}</p>
-
+      ${this._loading
+        ? html`<onboarding-loading margin="5px auto"></onboarding-loading>`
+        : ""}
       ${this._errorMsg
         ? html`<ha-alert alert-type="error">${this._errorMsg}</ha-alert>`
         : ""}
@@ -84,6 +92,7 @@ class OnboardingCreateUser extends LitElement {
           !this._newUser.username ||
           !this._newUser.password ||
           !this._newUser.password_confirm ||
+          !this._newUser.secret_key ||
           this._newUser.password !== this._newUser.password_confirm}
         >
           ${this.localize("ui.panel.page-onboarding.user.create_account")}
@@ -122,14 +131,17 @@ class OnboardingCreateUser extends LitElement {
   private _handleValueChanged(
     ev: ValueChangedEvent<HaFormDataContainer>
   ): void {
-    const nameChanged = ev.detail.value.name !== this._newUser.name;
+    // const nameChanged = ev.detail.value.name !== this._newUser.name;
     const passwordChanged =
       ev.detail.value.password !== this._newUser.password ||
       ev.detail.value.password_confirm !== this._newUser.password_confirm;
     this._newUser = ev.detail.value;
+    // disabled auto email-completing
+    /* 
     if (nameChanged) {
       this._maybePopulateUsername();
     }
+    */
     if (passwordChanged) {
       if (this._formError.password_confirm) {
         this._checkPasswordMatch();
@@ -158,6 +170,8 @@ class OnboardingCreateUser extends LitElement {
     }
   }
 
+  // disabled auto email-completing
+  /*
   private _maybePopulateUsername(): void {
     if (!this._newUser.name || this._newUser.name === this._newUser.username) {
       return;
@@ -168,9 +182,11 @@ class OnboardingCreateUser extends LitElement {
       this._newUser.username = parts[0].toLowerCase();
     }
   }
+  */
 
   private async _submitForm(ev): Promise<void> {
     ev.preventDefault();
+
     this._loading = true;
     this._errorMsg = "";
 
@@ -182,6 +198,7 @@ class OnboardingCreateUser extends LitElement {
         name: String(this._newUser.name),
         username: String(this._newUser.username),
         password: String(this._newUser.password),
+        secret_key: String(this._newUser.secret_key),
         language: this.language,
       });
 
