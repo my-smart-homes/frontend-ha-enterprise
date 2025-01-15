@@ -45,6 +45,11 @@ const CREATE_USER_SCHEMA: HaFormSchema[] = [
     required: true,
     selector: { text: { autocomplete: "off" } },
   },
+  {
+    name: "home_name",
+    required: true,
+    selector: { text: { autocomplete: "off" } },
+  },
 ];
 
 @customElement("onboarding-create-user")
@@ -93,6 +98,7 @@ class OnboardingCreateUser extends LitElement {
           !this._newUser.password ||
           !this._newUser.password_confirm ||
           !this._newUser.secret_key ||
+          !this._newUser.home_name ||
           this._newUser.password !== this._newUser.password_confirm}
         >
           ${this.localize("ui.panel.page-onboarding.user.create_account")}
@@ -199,6 +205,7 @@ class OnboardingCreateUser extends LitElement {
         username: String(this._newUser.username),
         password: String(this._newUser.password),
         secret_key: String(this._newUser.secret_key),
+        home_name: String(this._newUser.home_name),
         language: this.language,
       });
 

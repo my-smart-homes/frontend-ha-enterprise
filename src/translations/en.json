@@ -7163,7 +7163,8 @@
             "username": "Email",
             "password": "Password",
             "password_confirm": "Confirm password",
-            "secret_key": "Secret Key"
+            "secret_key": "Secret Key",
+            "home_name": "Home Name"
           },
           "helper": {
             "password": "Choose a strong and unique password. Make sure to save it, so you don't forget it."
