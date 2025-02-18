@@ -4209,14 +4209,18 @@
           "no_persons_created_yet": "Looks like you have not added any people yet.",
           "create_person": "Create person",
           "add_person": "Add person",
+          "add_building_manager": "Add building manager",
+          "add_building": "Add building",
           "confirm_delete_title": "Delete {name}?",
           "confirm_delete_text": "This person will be permanently deleted and all devices belonging to this person will become unassigned.",
           "person_not_found_title": "Person not found",
           "person_not_found": "We couldn't find the person you were trying to edit.",
           "detail": {
             "new_person": "New person",
+            "new_building_manager": "New building User",
             "name": "Name",
             "name_error_msg": "Name is required",
+            "manage_buildings": "Manage Other Buildings",
             "linked_user": "Linked User",
             "device_tracker_intro": "Select the devices that belong to this person.",
             "no_device_tracker_available_intro": "When you have devices that indicate the presence of a person, you will be able to assign them to a person here. You can add your first device by adding a presence-detection integration from the integrations page.",
@@ -4240,6 +4244,11 @@
             "change_username": "[%key:ui::panel::config::users::editor::change_username%]",
             "change_password": "[%key:ui::panel::config::users::editor::change_password%]"
           }
+        },
+        "building": {
+          "name": "Building Name",
+          "url":"Building Url",
+          "access_token":"Access Token"
         },
         "zone": {
           "caption": "Zones",

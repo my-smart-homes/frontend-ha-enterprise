@@ -15,6 +15,9 @@ import {
   Person,
   updatePerson,
 } from "../../../data/person";
+import {
+  Building
+} from "../../../data/building"
 import { fetchUsers, User } from "../../../data/user";
 import {
   showAlertDialog,
@@ -28,7 +31,9 @@ import "../ha-config-section";
 import { configSections } from "../ha-panel-config";
 import {
   loadPersonDetailDialog,
+  showPersonBuildingManagerDetailDialog,
   showPersonDetailDialog,
+  showPersonBuildingDetailDialog
 } from "./show-dialog-person-detail";
 
 @customElement("ha-config-person")
@@ -152,6 +157,22 @@ export class HaConfigPerson extends LitElement {
         >
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
+        <ha-fab
+          slot="fab"
+          .label=${hass.localize("ui.panel.config.person.add_building")}
+          extended
+          @click=${this._createBuilding}
+        >
+          <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
+        </ha-fab>
+        <ha-fab
+          slot="fab"
+          .label=${hass.localize("ui.panel.config.person.add_building_manager")}
+          extended
+          @click=${this._createBuildingManager}
+        >
+          <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
+        </ha-fab>
       </hass-tabs-subpage>
     `;
   }
@@ -203,6 +224,14 @@ export class HaConfigPerson extends LitElement {
     this._openDialog();
   }
 
+  private _createBuildingManager() {
+    this._openBuildingManagerDialog();
+  }
+
+  private _createBuilding() {
+    this._openBuildingDialog();
+  }
+
   private _openEditEntry(ev: MouseEvent) {
     const entry: Person = (ev.currentTarget! as any).entry;
     this._openDialog(entry);
@@ -227,6 +256,112 @@ export class HaConfigPerson extends LitElement {
     const users = await this._usersLoad!;
 
     showPersonDetailDialog(this, {
+      entry,
+      users: this._allowedUsers(users, entry),
+      createEntry: async (values) => {
+        const created = await createPerson(this.hass!, values);
+        this._storageItems = this._storageItems!.concat(created).sort(
+          (ent1, ent2) =>
+            stringCompare(ent1.name, ent2.name, this.hass!.locale.language)
+        );
+      },
+      updateEntry: async (values) => {
+        const updated = await updatePerson(this.hass!, entry!.id, values);
+        this._storageItems = this._storageItems!.map((ent) =>
+          ent === entry ? updated : ent
+        );
+      },
+      removeEntry: async () => {
+        if (
+          !(await showConfirmationDialog(this, {
+            title: this.hass!.localize(
+              "ui.panel.config.person.confirm_delete_title",
+              { name: entry!.name }
+            ),
+            text: this.hass!.localize(
+              "ui.panel.config.person.confirm_delete_text"
+            ),
+            dismissText: this.hass!.localize("ui.common.cancel"),
+            confirmText: this.hass!.localize("ui.common.delete"),
+            destructive: true,
+          }))
+        ) {
+          return false;
+        }
+
+        try {
+          await deletePerson(this.hass!, entry!.id);
+          this._storageItems = this._storageItems!.filter(
+            (ent) => ent !== entry
+          );
+          return true;
+        } catch (err: any) {
+          return false;
+        }
+      },
+      refreshUsers: () => {
+        this._usersLoad = fetchUsers(this.hass!);
+      },
+    });
+  }
+
+  private async _openBuildingManagerDialog(entry?: Person) {
+    const users = await this._usersLoad!;
+
+    showPersonBuildingManagerDetailDialog(this, {
+      entry,
+      users: this._allowedUsers(users, entry),
+      createEntry: async (values) => {
+        const created = await createPerson(this.hass!, values);
+        this._storageItems = this._storageItems!.concat(created).sort(
+          (ent1, ent2) =>
+            stringCompare(ent1.name, ent2.name, this.hass!.locale.language)
+        );
+      },
+      updateEntry: async (values) => {
+        const updated = await updatePerson(this.hass!, entry!.id, values);
+        this._storageItems = this._storageItems!.map((ent) =>
+          ent === entry ? updated : ent
+        );
+      },
+      removeEntry: async () => {
+        if (
+          !(await showConfirmationDialog(this, {
+            title: this.hass!.localize(
+              "ui.panel.config.person.confirm_delete_title",
+              { name: entry!.name }
+            ),
+            text: this.hass!.localize(
+              "ui.panel.config.person.confirm_delete_text"
+            ),
+            dismissText: this.hass!.localize("ui.common.cancel"),
+            confirmText: this.hass!.localize("ui.common.delete"),
+            destructive: true,
+          }))
+        ) {
+          return false;
+        }
+
+        try {
+          await deletePerson(this.hass!, entry!.id);
+          this._storageItems = this._storageItems!.filter(
+            (ent) => ent !== entry
+          );
+          return true;
+        } catch (err: any) {
+          return false;
+        }
+      },
+      refreshUsers: () => {
+        this._usersLoad = fetchUsers(this.hass!);
+      },
+    });
+  }
+
+  private async _openBuildingDialog(entry?: Building) {
+    const users = await this._usersLoad!;
+
+    showPersonBuildingDetailDialog(this, {
       entry,
       users: this._allowedUsers(users, entry),
       createEntry: async (values) => {
