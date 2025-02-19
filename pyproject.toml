@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name         = "my-smart-homes-frontend-enterprise"
-version      = "20250219.0"
+version      = "20250219.1"
 license      = {text = "Apache-2.0"}
 description  = "The Home Assistant frontend for Enterprise"
 readme       = "README.md"
