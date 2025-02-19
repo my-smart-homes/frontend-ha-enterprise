@@ -3697,9 +3697,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polymer/polymer@patch:@polymer/polymer@3.5.1#./.yarn/patches/@polymer/polymer/pr-5569.patch::locator=home-assistant-frontend%40workspace%3A.":
+"@polymer/polymer@patch:@polymer/polymer@3.5.1#./.yarn/patches/@polymer/polymer/pr-5569.patch::locator=home-assistant-frontend-enterprise%40workspace%3A.":
   version: 3.5.1
-  resolution: "@polymer/polymer@patch:@polymer/polymer@npm%3A3.5.1#./.yarn/patches/@polymer/polymer/pr-5569.patch::version=3.5.1&hash=0f00db&locator=home-assistant-frontend%40workspace%3A."
+  resolution: "@polymer/polymer@patch:@polymer/polymer@npm%3A3.5.1#./.yarn/patches/@polymer/polymer/pr-5569.patch::version=3.5.1&hash=0f00db&locator=home-assistant-frontend-enterprise%40workspace%3A."
   dependencies:
     "@webcomponents/shadycss": "npm:^1.9.1"
   checksum: 10/31cc3b40866b302c305684e8070aae2428af4949f56c716a5d8bdbd685d9d1f309b308981264a317cb242ae53038f373cf3fb25b96f9e0cb02dc505082605a52
@@ -8889,9 +8889,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"home-assistant-frontend@workspace:.":
+"home-assistant-frontend-enterprise@workspace:.":
   version: 0.0.0-use.local
-  resolution: "home-assistant-frontend@workspace:."
+  resolution: "home-assistant-frontend-enterprise@workspace:."
   dependencies:
     "@babel/core": "npm:7.25.2"
     "@babel/helper-define-polyfill-provider": "npm:0.6.2"
@@ -10411,9 +10411,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet-draw@patch:leaflet-draw@npm%3A1.0.4#./.yarn/patches/leaflet-draw-npm-1.0.4-0ca0ebcf65.patch::locator=home-assistant-frontend%40workspace%3A.":
+"leaflet-draw@patch:leaflet-draw@npm%3A1.0.4#./.yarn/patches/leaflet-draw-npm-1.0.4-0ca0ebcf65.patch::locator=home-assistant-frontend-enterprise%40workspace%3A.":
   version: 1.0.4
-  resolution: "leaflet-draw@patch:leaflet-draw@npm%3A1.0.4#./.yarn/patches/leaflet-draw-npm-1.0.4-0ca0ebcf65.patch::version=1.0.4&hash=790842&locator=home-assistant-frontend%40workspace%3A."
+  resolution: "leaflet-draw@patch:leaflet-draw@npm%3A1.0.4#./.yarn/patches/leaflet-draw-npm-1.0.4-0ca0ebcf65.patch::version=1.0.4&hash=790842&locator=home-assistant-frontend-enterprise%40workspace%3A."
   checksum: 10/70e43ef0307dd3995dc392609a627b349070f25a57b908a4ab07e17b579878fdd0ff090847ca42826b933c547e324a4e560f35a8a1417f8209e702c3512e4d8a
   languageName: node
   linkType: hard

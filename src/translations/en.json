@@ -4247,8 +4247,8 @@
         },
         "building": {
           "name": "Building Name",
-          "url":"Building Url",
-          "access_token":"Access Token"
+          "url": "Building Url Domain",
+          "access_token": "Access Token"
         },
         "zone": {
           "caption": "Zones",
