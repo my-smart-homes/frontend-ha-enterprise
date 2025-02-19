@@ -15,9 +15,7 @@ import {
   Person,
   updatePerson,
 } from "../../../data/person";
-import {
-  Building
-} from "../../../data/building"
+import { Building } from "../../../data/building";
 import { fetchUsers, User } from "../../../data/user";
 import {
   showAlertDialog,
@@ -33,14 +31,60 @@ import {
   loadPersonDetailDialog,
   showPersonBuildingManagerDetailDialog,
   showPersonDetailDialog,
-  showPersonBuildingDetailDialog
+  showPersonBuildingDetailDialog,
 } from "./show-dialog-person-detail";
+import { HA_MANAGER_BASE_URL } from "./constants";
+
+/**
+ * Fetch the raw building/users data from the API.
+ *
+ * Expected response format:
+ * {
+ *   "success": true,
+ *   "data": {
+ *     "Bhesh Home": {
+ *       "id": 1,
+ *       "type": "result",
+ *       "success": true,
+ *       "result": [ { ... user data ... } ]
+ *     },
+ *     ...other buildings
+ *   }
+ * }
+ */
+export const fetchBuildingUsersRaw = async (): Promise<Record<string, any>> => {
+  const response = await fetch(`${HA_MANAGER_BASE_URL}/building/users`);
+  const responseJson = await response.json();
+  if (responseJson && responseJson.success && responseJson.data) {
+    return responseJson.data;
+  }
+  return {};
+};
+
+/**
+ * (Optional) This helper function flattens the raw building data into a simple array,
+ * annotating each user with its building name.
+ */
+export const flattenBuildingUsers = (
+  buildingData: Record<string, any>
+): User[] => {
+  const flattened: User[] = [];
+  Object.entries(buildingData).forEach(([buildingName, data]) => {
+    if (data.success && Array.isArray(data.result)) {
+      data.result.forEach((user: any) => {
+        flattened.push({ ...user, building: buildingName });
+      });
+    }
+  });
+  return flattened;
+};
 
 @customElement("ha-config-person")
 export class HaConfigPerson extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property({ type: Boolean }) public isWide = false;
+  @property({ type: Boolean, attribute: "is-wide" })
+  public isWide = false;
 
   @property({ type: Boolean }) public narrow = false;
 
@@ -50,7 +94,14 @@ export class HaConfigPerson extends LitElement {
 
   @state() private _configItems?: Person[];
 
+  // This promise will resolve to the combined list of users (local + flattened building users)
   private _usersLoad?: Promise<User[]>;
+
+  /**
+   * Holds the raw building data as returned by the API.
+   * The keys are building names and each value contains a "result" array.
+   */
+  @state() private _buildingData: Record<string, any> = {};
 
   protected render() {
     if (
@@ -63,16 +114,16 @@ export class HaConfigPerson extends LitElement {
     const hass = this.hass;
     return html`
       <hass-tabs-subpage
-        .hass=${this.hass}
+        .hass=${hass}
         .narrow=${this.narrow}
         .route=${this.route}
         back-path="/config"
         .tabs=${configSections.persons}
       >
         <ha-config-section .isWide=${this.isWide}>
-          <span slot="header"
-            >${hass.localize("ui.panel.config.person.caption")}</span
-          >
+          <span slot="header">
+            ${hass.localize("ui.panel.config.person.caption")}
+          </span>
           <span slot="introduction">
             <p>${hass.localize("ui.panel.config.person.introduction")}</p>
             ${this._configItems.length > 0
@@ -84,16 +135,16 @@ export class HaConfigPerson extends LitElement {
                   </p>
                 `
               : ""}
-
             <a
-              href=${documentationUrl(this.hass, "/integrations/person/")}
+              href=${documentationUrl(hass, "/integrations/person/")}
               target="_blank"
               rel="noreferrer"
             >
-              ${this.hass.localize("ui.panel.config.person.learn_more")}
+              ${hass.localize("ui.panel.config.person.learn_more")}
             </a>
           </span>
 
+          <!-- Storage Persons List -->
           <ha-card outlined class="storage">
             <mwc-list>
               ${this._storageItems.map(
@@ -104,7 +155,7 @@ export class HaConfigPerson extends LitElement {
                     .entry=${entry}
                   >
                     <ha-person-badge
-                      .hass=${this.hass}
+                      .hass=${hass}
                       .person=${entry}
                       slot="graphic"
                     ></ha-person-badge>
@@ -120,14 +171,31 @@ export class HaConfigPerson extends LitElement {
                       "ui.panel.config.person.no_persons_created_yet"
                     )}
                     <mwc-button @click=${this._createPerson}>
-                      ${hass.localize(
-                        "ui.panel.config.person.create_person"
-                      )}</mwc-button
-                    >
+                      ${hass.localize("ui.panel.config.person.create_person")}
+                    </mwc-button>
                   </div>
                 `
               : nothing}
           </ha-card>
+
+          <!-- Building Users Section -->
+          <ha-card outlined header="All Building Users">
+            <mwc-list> ${this._getBuildingUserTemplate()} </mwc-list>
+            ${this._hasBuildingUsers() === false
+              ? html`
+                  <div class="empty">
+                    "No Data"
+                    <mwc-button @click=${this._createBuildingManager}>
+                      ${hass.localize(
+                        "ui.panel.config.person.add_building_manager"
+                      )}
+                    </mwc-button>
+                  </div>
+                `
+              : nothing}
+          </ha-card>
+
+          <!-- Configuration.yaml Persons List -->
           ${this._configItems.length > 0
             ? html`
                 <ha-card outlined header="Configuration.yaml persons">
@@ -136,7 +204,7 @@ export class HaConfigPerson extends LitElement {
                       (entry) => html`
                         <ha-list-item graphic="avatar">
                           <ha-person-badge
-                            .hass=${this.hass}
+                            .hass=${hass}
                             .person=${entry}
                             slot="graphic"
                           ></ha-person-badge>
@@ -149,6 +217,8 @@ export class HaConfigPerson extends LitElement {
               `
             : nothing}
         </ha-config-section>
+
+        <!-- Floating Action Buttons -->
         <ha-fab
           slot="fab"
           .label=${hass.localize("ui.panel.config.person.add_person")}
@@ -184,8 +254,21 @@ export class HaConfigPerson extends LitElement {
   }
 
   private async _fetchData() {
-    this._usersLoad = fetchUsers(this.hass!);
-    const personData = await fetchPersons(this.hass!);
+    // Fetch local users, raw building data, and persons concurrently.
+    const [users, buildingData, personData] = await Promise.all([
+      fetchUsers(this.hass!),
+      fetchBuildingUsersRaw(),
+      fetchPersons(this.hass!),
+    ]);
+
+    // Save the raw building data for looping over building names.
+    this._buildingData = buildingData;
+
+    // Flatten the building data (annotate each user with its building name)
+    const flattenedBuildingUsers = flattenBuildingUsers(buildingData);
+
+    // Combine local users with flattened building users for use in dialogs.
+    this._usersLoad = Promise.resolve([...users, ...flattenedBuildingUsers]);
 
     this._storageItems = personData.storage.sort((ent1, ent2) =>
       stringCompare(ent1.name, ent2.name, this.hass!.locale.language)
@@ -200,13 +283,11 @@ export class HaConfigPerson extends LitElement {
     if (!this.route.path.includes("/edit/")) {
       return;
     }
-
     const routeSegments = this.route.path.split("/edit/");
     const personId = routeSegments.length > 1 ? routeSegments[1] : null;
     if (!personId) {
       return;
     }
-
     const personToEdit = this._storageItems!.find((p) => p.id === personId);
     if (personToEdit) {
       this._openDialog(personToEdit);
@@ -254,7 +335,6 @@ export class HaConfigPerson extends LitElement {
 
   private async _openDialog(entry?: Person) {
     const users = await this._usersLoad!;
-
     showPersonDetailDialog(this, {
       entry,
       users: this._allowedUsers(users, entry),
@@ -288,7 +368,6 @@ export class HaConfigPerson extends LitElement {
         ) {
           return false;
         }
-
         try {
           await deletePerson(this.hass!, entry!.id);
           this._storageItems = this._storageItems!.filter(
@@ -299,15 +378,20 @@ export class HaConfigPerson extends LitElement {
           return false;
         }
       },
-      refreshUsers: () => {
-        this._usersLoad = fetchUsers(this.hass!);
+      refreshUsers: async () => {
+        const [fetchedUsers, buildingData] = await Promise.all([
+          fetchUsers(this.hass!),
+          fetchBuildingUsersRaw(),
+        ]);
+        this._buildingData = buildingData;
+        const flattened = flattenBuildingUsers(buildingData);
+        this._usersLoad = Promise.resolve([...fetchedUsers, ...flattened]);
       },
     });
   }
 
   private async _openBuildingManagerDialog(entry?: Person) {
     const users = await this._usersLoad!;
-
     showPersonBuildingManagerDetailDialog(this, {
       entry,
       users: this._allowedUsers(users, entry),
@@ -341,7 +425,6 @@ export class HaConfigPerson extends LitElement {
         ) {
           return false;
         }
-
         try {
           await deletePerson(this.hass!, entry!.id);
           this._storageItems = this._storageItems!.filter(
@@ -352,15 +435,20 @@ export class HaConfigPerson extends LitElement {
           return false;
         }
       },
-      refreshUsers: () => {
-        this._usersLoad = fetchUsers(this.hass!);
+      refreshUsers: async () => {
+        const [fetchedUsers, buildingData] = await Promise.all([
+          fetchUsers(this.hass!),
+          fetchBuildingUsersRaw(),
+        ]);
+        this._buildingData = buildingData;
+        const flattened = flattenBuildingUsers(buildingData);
+        this._usersLoad = Promise.resolve([...fetchedUsers, ...flattened]);
       },
     });
   }
 
   private async _openBuildingDialog(entry?: Building) {
     const users = await this._usersLoad!;
-
     showPersonBuildingDetailDialog(this, {
       entry,
       users: this._allowedUsers(users, entry),
@@ -394,7 +482,6 @@ export class HaConfigPerson extends LitElement {
         ) {
           return false;
         }
-
         try {
           await deletePerson(this.hass!, entry!.id);
           this._storageItems = this._storageItems!.filter(
@@ -405,10 +492,108 @@ export class HaConfigPerson extends LitElement {
           return false;
         }
       },
-      refreshUsers: () => {
-        this._usersLoad = fetchUsers(this.hass!);
+      refreshUsers: async () => {
+        const [fetchedUsers, buildingData] = await Promise.all([
+          fetchUsers(this.hass!),
+          fetchBuildingUsersRaw(),
+        ]);
+        this._buildingData = buildingData;
+        const flattened = flattenBuildingUsers(buildingData);
+        this._usersLoad = Promise.resolve([...fetchedUsers, ...flattened]);
       },
     });
+  }
+
+  /**
+   * Renders the Building Users section by looping over the raw building data.
+   * For each building, we filter for users whose group_ids include either
+   * "system-admin" or "system-users" and then group them by group.
+   */
+  private _getBuildingUserTemplate() {
+    return Object.entries(this._buildingData).map(
+      ([buildingName, data], index) => {
+        if (!data.success || !Array.isArray(data.result)) {
+          return nothing;
+        }
+        // Filter for users that are either "system-admin" or "system-users"
+        const buildingUsers = data.result.filter(
+          (user: any) =>
+            user.group_ids &&
+            Array.isArray(user.group_ids) &&
+            (user.group_ids.includes("system-admin") ||
+              user.group_ids.includes("system-users"))
+        );
+        if (buildingUsers.length === 0) {
+          return nothing;
+        }
+        // Group the users by group.
+        const groups: Record<string, any[]> = {};
+        buildingUsers.forEach((user: any) => {
+          if (user.group_ids.includes("system-admin")) {
+            groups["system-admin"] = groups["system-admin"] || [];
+            groups["system-admin"].push(user);
+          }
+          if (user.group_ids.includes("system-users")) {
+            groups["system-users"] = groups["system-users"] || [];
+            groups["system-users"].push(user);
+          }
+        });
+        return html`
+          <div class="building-user-group">
+            <h2>${index + 1}. ${buildingName}</h2>
+            ${Object.entries(groups).map(
+              ([group, building_users]) => html`
+                <div class="group-section">
+                  <h3>${group === "system-admin" ? "Managers" : "Users"}</h3>
+                  ${building_users.map(
+                    (user: any) => html`
+                      <ha-list-item
+                        graphic="avatar"
+                        @click=${this._handleBuildingUserClick}
+                        .entry=${user}
+                      >
+                        <ha-person-badge
+                          .hass=${this.hass}
+                          .person=${user}
+                          slot="graphic"
+                        ></ha-person-badge>
+                        <span>${user.name}</span>
+                      </ha-list-item>
+                    `
+                  )}
+                </div>
+              `
+            )}
+          </div>
+        `;
+      }
+    );
+  }
+
+  /**
+   * Returns true if at least one building in the raw data has building users (admin or users).
+   */
+  private _hasBuildingUsers(): boolean {
+    return Object.entries(this._buildingData).some(([_, data]) => {
+      if (!data.success || !Array.isArray(data.result)) return false;
+      return data.result.some(
+        (user: any) =>
+          user.group_ids &&
+          Array.isArray(user.group_ids) &&
+          (user.group_ids.includes("system-admin") ||
+            user.group_ids.includes("system-users"))
+      );
+    });
+  }
+
+  /**
+   * Handles click events on building user items.
+   * Retrieves the `entry` from the event’s currentTarget and opens the building manager dialog.
+   */
+  private _handleBuildingUserClick(ev: Event) {
+    const target = ev.currentTarget as any;
+    const user = target.entry;
+    this._openBuildingManagerDialog(user);
   }
 
   static get styles(): CSSResultGroup {
@@ -426,6 +611,12 @@ export class HaConfigPerson extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-around;
+      }
+      .building-user-group h2 {
+        margin: 16px;
+      }
+      .group-section h3 {
+        margin: 8px 16px;
       }
     `;
   }

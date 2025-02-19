@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/home-assistant/frontend"
   },
-  "name": "home-assistant-frontend",
+  "name": "home-assistant-frontend-enterprise",
   "version": "1.0.0",
   "scripts": {
     "build": "script/build_frontend",
