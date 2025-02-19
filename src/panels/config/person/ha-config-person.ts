@@ -179,14 +179,12 @@ export class HaConfigPerson extends LitElement {
           </ha-card>
 
           <!-- Building Users Section -->
-          <ha-card outlined header="Building Users">
+          <ha-card outlined header="All Building Users">
             <mwc-list> ${this._getBuildingUserTemplate()} </mwc-list>
             ${this._hasBuildingUsers() === false
               ? html`
                   <div class="empty">
-                    ${hass.localize(
-                      "ui.panel.config.person.detail.allow_login"
-                    )}
+                    "No Data"
                     <mwc-button @click=${this._createBuildingManager}>
                       ${hass.localize(
                         "ui.panel.config.person.add_building_manager"
@@ -512,62 +510,64 @@ export class HaConfigPerson extends LitElement {
    * "system-admin" or "system-users" and then group them by group.
    */
   private _getBuildingUserTemplate() {
-    return Object.entries(this._buildingData).map(([buildingName, data]) => {
-      if (!data.success || !Array.isArray(data.result)) {
-        return nothing;
-      }
-      // Filter for users that are either "system-admin" or "system-users"
-      const buildingUsers = data.result.filter(
-        (user: any) =>
-          user.group_ids &&
-          Array.isArray(user.group_ids) &&
-          (user.group_ids.includes("system-admin") ||
-            user.group_ids.includes("system-users"))
-      );
-      if (buildingUsers.length === 0) {
-        return nothing;
-      }
-      // Group the users by group.
-      const groups: Record<string, any[]> = {};
-      buildingUsers.forEach((user: any) => {
-        if (user.group_ids.includes("system-admin")) {
-          groups["system-admin"] = groups["system-admin"] || [];
-          groups["system-admin"].push(user);
+    return Object.entries(this._buildingData).map(
+      ([buildingName, data], index) => {
+        if (!data.success || !Array.isArray(data.result)) {
+          return nothing;
         }
-        if (user.group_ids.includes("system-users")) {
-          groups["system-users"] = groups["system-users"] || [];
-          groups["system-users"].push(user);
+        // Filter for users that are either "system-admin" or "system-users"
+        const buildingUsers = data.result.filter(
+          (user: any) =>
+            user.group_ids &&
+            Array.isArray(user.group_ids) &&
+            (user.group_ids.includes("system-admin") ||
+              user.group_ids.includes("system-users"))
+        );
+        if (buildingUsers.length === 0) {
+          return nothing;
         }
-      });
-      return html`
-        <div class="building-user-group">
-          <h2>${buildingName}</h2>
-          ${Object.entries(groups).map(
-            ([group, building_users]) => html`
-              <div class="group-section">
-                <h3>${group === "system-admin" ? "Managers" : "Users"}</h3>
-                ${building_users.map(
-                  (user: any) => html`
-                    <ha-list-item
-                      graphic="avatar"
-                      @click=${this._handleBuildingUserClick}
-                      .entry=${user}
-                    >
-                      <ha-person-badge
-                        .hass=${this.hass}
-                        .person=${user}
-                        slot="graphic"
-                      ></ha-person-badge>
-                      <span>${user.name}</span>
-                    </ha-list-item>
-                  `
-                )}
-              </div>
-            `
-          )}
-        </div>
-      `;
-    });
+        // Group the users by group.
+        const groups: Record<string, any[]> = {};
+        buildingUsers.forEach((user: any) => {
+          if (user.group_ids.includes("system-admin")) {
+            groups["system-admin"] = groups["system-admin"] || [];
+            groups["system-admin"].push(user);
+          }
+          if (user.group_ids.includes("system-users")) {
+            groups["system-users"] = groups["system-users"] || [];
+            groups["system-users"].push(user);
+          }
+        });
+        return html`
+          <div class="building-user-group">
+            <h2>${index + 1}. ${buildingName}</h2>
+            ${Object.entries(groups).map(
+              ([group, building_users]) => html`
+                <div class="group-section">
+                  <h3>${group === "system-admin" ? "Managers" : "Users"}</h3>
+                  ${building_users.map(
+                    (user: any) => html`
+                      <ha-list-item
+                        graphic="avatar"
+                        @click=${this._handleBuildingUserClick}
+                        .entry=${user}
+                      >
+                        <ha-person-badge
+                          .hass=${this.hass}
+                          .person=${user}
+                          slot="graphic"
+                        ></ha-person-badge>
+                        <span>${user.name}</span>
+                      </ha-list-item>
+                    `
+                  )}
+                </div>
+              `
+            )}
+          </div>
+        `;
+      }
+    );
   }
 
   /**
