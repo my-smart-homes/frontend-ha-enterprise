@@ -3,10 +3,10 @@ requires = ["setuptools~=68.0", "wheel~=0.40.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name         = "my-smart-homes-frontend"
-version      = "20241025.6"
+name         = "my-smart-homes-frontend-enterprise"
+version      = "20250219.0"
 license      = {text = "Apache-2.0"}
-description  = "The Home Assistant frontend"
+description  = "The Home Assistant frontend for Enterprise"
 readme       = "README.md"
 authors      = [
     {name = "The Home Assistant Authors", email = "hello@home-assistant.io"}
@@ -14,7 +14,7 @@ authors      = [
 requires-python = ">=3.11.0"
 
 [project.urls]
-"Homepage" = "https://github.com/my-smart-homes/frontend-ha/"
+"Homepage" = "https://github.com/my-smart-homes/frontend-ha-enterprise"
 
 [tool.setuptools]
 platforms = ["any"]
