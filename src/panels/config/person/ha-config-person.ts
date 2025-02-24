@@ -9,13 +9,13 @@ import "../../../components/ha-svg-icon";
 import "../../../components/ha-list-item";
 import "../../../components/user/ha-person-badge";
 import {
+  BuildingPerson,
   createPerson,
   deletePerson,
   fetchPersons,
   Person,
   updatePerson,
 } from "../../../data/person";
-import { Building } from "../../../data/building";
 import { fetchUsers, User } from "../../../data/user";
 import {
   showAlertDialog,
@@ -61,6 +61,21 @@ export const fetchBuildingUsersRaw = async (): Promise<Record<string, any>> => {
   return {};
 };
 
+export const deleteBuildingUser = async (
+  buildingId: number,
+  userId: string
+): Promise<void> => {
+  const response = await fetch(
+    `${HA_MANAGER_BASE_URL}/building/delete-user/${buildingId}/${userId}`,
+    {
+      method: "DELETE",
+    }
+  );
+  if (!response.ok) {
+    throw new Error("Failed to delete building user");
+  }
+};
+
 /**
  * (Optional) This helper function flattens the raw building data into a simple array,
  * annotating each user with its building name.
@@ -72,7 +87,11 @@ export const flattenBuildingUsers = (
   Object.entries(buildingData).forEach(([buildingName, data]) => {
     if (data.success && Array.isArray(data.result)) {
       data.result.forEach((user: any) => {
-        flattened.push({ ...user, building: buildingName });
+        flattened.push({
+          ...user,
+          building: buildingName,
+          building_id: data.building_id,
+        });
       });
     }
   });
@@ -263,7 +282,6 @@ export class HaConfigPerson extends LitElement {
 
     // Save the raw building data for looping over building names.
     this._buildingData = buildingData;
-
     // Flatten the building data (annotate each user with its building name)
     const flattenedBuildingUsers = flattenBuildingUsers(buildingData);
 
@@ -333,7 +351,7 @@ export class HaConfigPerson extends LitElement {
     );
   }
 
-  private async _openDialog(entry?: Person) {
+  private async _openDialog(entry?: BuildingPerson) {
     const users = await this._usersLoad!;
     showPersonDetailDialog(this, {
       entry,
@@ -390,11 +408,17 @@ export class HaConfigPerson extends LitElement {
     });
   }
 
-  private async _openBuildingManagerDialog(entry?: Person) {
+  private async _openBuildingManagerDialog(entry?: BuildingPerson) {
     const users = await this._usersLoad!;
+
+    // const buildingId = Object.entries(this._buildingData).find(
+    //   ([, data]) => data.result.some((user: any) => user.id === entry!.id)
+    // )?.[1].id;
+    // entry!.building_id = entry!.building_id || 1;
+    const buildingId = entry!.building_id;
     showPersonBuildingManagerDetailDialog(this, {
-      entry,
-      users: this._allowedUsers(users, entry),
+      entry: entry,
+      users: users,
       createEntry: async (values) => {
         const created = await createPerson(this.hass!, values);
         this._storageItems = this._storageItems!.concat(created).sort(
@@ -426,7 +450,7 @@ export class HaConfigPerson extends LitElement {
           return false;
         }
         try {
-          await deletePerson(this.hass!, entry!.id);
+          await deleteBuildingUser(buildingId!, entry!.id!);
           this._storageItems = this._storageItems!.filter(
             (ent) => ent !== entry
           );
@@ -447,7 +471,7 @@ export class HaConfigPerson extends LitElement {
     });
   }
 
-  private async _openBuildingDialog(entry?: Building) {
+  private async _openBuildingDialog(entry?: BuildingPerson) {
     const users = await this._usersLoad!;
     showPersonBuildingDetailDialog(this, {
       entry,
