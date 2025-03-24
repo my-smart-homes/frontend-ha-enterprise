@@ -415,7 +415,7 @@ export class HaConfigPerson extends LitElement {
     //   ([, data]) => data.result.some((user: any) => user.id === entry!.id)
     // )?.[1].id;
     // entry!.building_id = entry!.building_id || 1;
-    const buildingId = entry!.building_id;
+    const buildingId = entry?.building_id || 1;
     showPersonBuildingManagerDetailDialog(this, {
       entry: entry,
       users: users,
