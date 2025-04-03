@@ -433,25 +433,42 @@ export class DialogPersonBuildingManager extends LitElement {
       return;
     }
 
-    const payload = {
-      display_name: this._displayName,
-      username: this._username,
-      password: this._password,
-      confirm_password: this._confirmPassword,
-      building_id: this._selectedBuildingId,
-      local_access_only: this._localAccessOnly,
-      administrator: this._administrator,
-    };
+    const formData = new FormData();
+
+    // Add the image file if it exists
+    if (this._picture) {
+      try {
+        // Convert base64 to blob
+        const response = await fetch(this._picture);
+        const blob = await response.blob();
+        formData.append("profile_picture", blob, "profile.jpg");
+      } catch (err) {
+        showAlertDialog(this, {
+          title: `Error processing image: ${err}`,
+        });
+      }
+    }
+
+    // Add other form data
+    formData.append("display_name", this._displayName);
+    formData.append("username", this._username);
+    formData.append("password", this._password);
+    formData.append("confirm_password", this._confirmPassword);
+    if (this._selectedBuildingId !== null) {
+      formData.append("building_id", this._selectedBuildingId.toString());
+    }
+    formData.append("local_access_only", this._localAccessOnly.toString());
+    formData.append("administrator", this._administrator.toString());
 
     try {
+      if (this._selectedBuildingId === null) {
+        throw new Error("Building ID is required");
+      }
       const response = await fetch(
         `${HA_MANAGER_BASE_URL}/building/create-user/${this._selectedBuildingId}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+          body: formData,
         }
       );
 
@@ -678,44 +695,6 @@ export class DialogPersonBuildingManager extends LitElement {
       }
     }
   }
-
-  // private async _updateEntry() {
-  //   this._submitting = true;
-  //   try {
-  //     if (
-  //       (this._userId && this._name !== this._params!.entry?.name) ||
-  //       this._isAdmin !==
-  //         this._user?.group_ids.includes(SYSTEM_GROUP_ID_ADMIN) ||
-  //       this._localOnly !== this._user?.local_only
-  //     ) {
-  //       await updateUser(this.hass!, this._userId!, {
-  //         name: this._name.trim(),
-  //         group_ids: [
-  //           this._isAdmin ? SYSTEM_GROUP_ID_ADMIN : SYSTEM_GROUP_ID_USER,
-  //         ],
-  //         local_only: this._localOnly,
-  //       });
-  //       this._params?.refreshUsers();
-  //     }
-  //     const values: PersonMutableParams = {
-  //       name: this._name.trim(),
-  //       device_trackers: this._deviceTrackers,
-  //       user_id: this._userId || null,
-  //       picture: this._picture,
-  //     };
-  //     if (this._params!.entry) {
-  //       await this._params!.updateEntry(values);
-  //     } else {
-  //       await this._params!.createEntry(values);
-  //       this._personExists = true;
-  //     }
-  //     this._params = undefined;
-  //   } catch (err: any) {
-  //     this._error = err ? err.message : "Unknown error";
-  //   } finally {
-  //     this._submitting = false;
-  //   }
-  // }
 
   private async _deleteEntry() {
     this._submitting = true;
