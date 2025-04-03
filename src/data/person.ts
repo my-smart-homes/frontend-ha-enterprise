@@ -15,6 +15,13 @@ export interface Person extends BasePerson {
   device_trackers?: string[];
 }
 
+export interface BuildingPerson extends Person {
+  username?: string;
+  group_ids?: string[];
+  local_only?: boolean;
+  building_id?: number;
+}
+
 export interface PersonMutableParams {
   name: string;
   user_id: string | null;
