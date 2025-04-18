@@ -103,6 +103,7 @@ export class DialogPersonBuildingManager extends LitElement {
       this._userId = this._params.entry.id || undefined;
       this._deviceTrackers = this._params.entry.device_trackers || [];
       this._picture = this._params.entry.picture || null;
+      console.log("Raw picture from entry:", this._params!.entry!);
       this._user = this._userId
         ? this._params.users.find((user) => user.id === this._userId)
         : undefined;
@@ -507,9 +508,9 @@ export class DialogPersonBuildingManager extends LitElement {
     const payload = {
       user_id: this._userId,
       display_name: this._displayName,
-      username: this._username,
-      password: this._password,
-      confirm_password: this._confirmPassword,
+      user_name: this._username,
+      // current_password: this._password,
+      new_password: this._confirmPassword,
       building_id: this._selectedBuildingId,
       local_access_only: this._localAccessOnly,
       administrator: this._administrator,
@@ -557,48 +558,6 @@ export class DialogPersonBuildingManager extends LitElement {
     const user = this._user;
     if (!user) return nothing;
     return html`
-      ${!user.system_generated
-        ? html`
-            <ha-settings-row>
-              <span slot="heading">
-                ${this.hass.localize("ui.panel.config.person.detail.username")}
-              </span>
-              <span slot="description">${user.username}</span>
-              ${this.hass.user?.is_owner
-                ? html`
-                    <ha-icon-button
-                      .path=${mdiPencil}
-                      @click=${this._changeUsername}
-                      .label=${this.hass.localize(
-                        "ui.panel.config.person.detail.change_username"
-                      )}
-                    ></ha-icon-button>
-                  `
-                : nothing}
-            </ha-settings-row>
-          `
-        : nothing}
-      ${!user.system_generated && this.hass.user?.is_owner
-        ? html`
-            <ha-settings-row>
-              <span slot="heading">
-                ${this.hass.localize("ui.panel.config.person.detail.password")}
-              </span>
-              <span slot="description">************</span>
-              ${this.hass.user?.is_owner
-                ? html`
-                    <ha-icon-button
-                      .path=${mdiPencil}
-                      @click=${this._changePassword}
-                      .label=${this.hass.localize(
-                        "ui.panel.config.person.detail.change_password"
-                      )}
-                    ></ha-icon-button>
-                  `
-                : nothing}
-            </ha-settings-row>
-          `
-        : nothing}
       <ha-settings-row>
         <span slot="heading">
           ${this.hass.localize(
