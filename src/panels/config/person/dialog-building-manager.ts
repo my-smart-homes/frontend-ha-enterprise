@@ -67,7 +67,7 @@ export class DialogPersonBuildingManager extends LitElement {
   @state() private _personExists = false;
 
   // New API fields – inspired by your add‑user dialog
-  @state() private _displayName = "";
+  // @state() private _displayName = "";
 
   @state() private _username = "";
 
@@ -98,11 +98,12 @@ export class DialogPersonBuildingManager extends LitElement {
     if (this._params.entry) {
       this._personExists = true;
       this._name = this._params.entry.name || "";
-      this._displayName = this._params.entry.name || "";
+      // this._displayName = this._params.entry.name || "";
       this._username = this._params.entry.username || "";
       this._userId = this._params.entry.id || undefined;
       this._deviceTrackers = this._params.entry.device_trackers || [];
       this._picture = this._params.entry.picture || null;
+      console.log("Raw picture from entry:", this._params!.entry!);
       this._user = this._userId
         ? this._params.users.find((user) => user.id === this._userId)
         : undefined;
@@ -123,7 +124,7 @@ export class DialogPersonBuildingManager extends LitElement {
       this._picture = null;
 
       // Reset new API fields.
-      this._displayName = "";
+      // this._displayName = "";
       this._username = "";
       this._password = "";
       this._confirmPassword = "";
@@ -198,16 +199,6 @@ export class DialogPersonBuildingManager extends LitElement {
             @change=${this._pictureChanged}
           ></ha-picture-upload>
 
-          <!-- New API Fields (User credentials) -->
-          <ha-textfield
-            class="display-name"
-            name="displayName"
-            .value=${this._displayName}
-            @input=${this._handleValueChanged}
-            label="Display Name"
-            required
-            .validationMessage=${this.hass.localize("ui.common.error_required")}
-          ></ha-textfield>
           <ha-textfield
             class="username"
             name="username"
@@ -274,7 +265,6 @@ export class DialogPersonBuildingManager extends LitElement {
           </ha-settings-row>
 
           <!-- (Optional) Render extra user fields if a Home Assistant user exists -->
-          ${this._renderUserFields()}
           ${this._deviceTrackersAvailable(this.hass)
             ? html`
                 <p>
@@ -364,9 +354,9 @@ export class DialogPersonBuildingManager extends LitElement {
       case "name":
         this._name = target.value;
         break;
-      case "displayName":
-        this._displayName = target.value;
-        break;
+      // case "displayName":
+      //   this._displayName = target.value;
+      //   break;
       case "username":
         this._username = target.value;
         break;
@@ -450,7 +440,7 @@ export class DialogPersonBuildingManager extends LitElement {
     }
 
     // Add other form data
-    formData.append("display_name", this._displayName);
+    formData.append("display_name", this._name);
     formData.append("username", this._username);
     formData.append("password", this._password);
     formData.append("confirm_password", this._confirmPassword);
@@ -504,29 +494,46 @@ export class DialogPersonBuildingManager extends LitElement {
       return;
     }
 
-    const payload = {
-      user_id: this._userId,
-      display_name: this._displayName,
-      username: this._username,
-      password: this._password,
-      confirm_password: this._confirmPassword,
-      building_id: this._selectedBuildingId,
-      local_access_only: this._localAccessOnly,
-      administrator: this._administrator,
-      group_ids: this._administrator
-        ? [SYSTEM_GROUP_ID_ADMIN]
-        : [SYSTEM_GROUP_ID_USER],
-    };
+    const formData = new FormData();
+
+    // Add the image file if it exists
+    if (this._picture) {
+      try {
+        // Convert base64 to blob
+        const response = await fetch(this._picture);
+        const blob = await response.blob();
+        formData.append("profile_picture", blob, "profile.jpg");
+      } catch (err) {
+        showAlertDialog(this, {
+          title: `Error processing image: ${err}`,
+        });
+      }
+    }
+
+    // Add other form data
+    formData.append("user_id", this._userId!);
+
+    formData.append("display_name", this._name);
+    formData.append("user_name", this._username);
+    formData.append("new_password", this._confirmPassword);
+    if (this._selectedBuildingId !== null) {
+      formData.append("building_id", this._selectedBuildingId.toString());
+    }
+    formData.append("local_access_only", this._localAccessOnly.toString());
+    formData.append(
+      "group_ids",
+      this._administrator ? SYSTEM_GROUP_ID_ADMIN : SYSTEM_GROUP_ID_USER
+    );
 
     try {
       const response = await fetch(
         `${HA_MANAGER_BASE_URL}/building/edit-user/${this._selectedBuildingId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+          // headers: {
+          //   "Content-Type": "application/json",
+          // },
+          body: formData,
         }
       );
 
@@ -557,48 +564,6 @@ export class DialogPersonBuildingManager extends LitElement {
     const user = this._user;
     if (!user) return nothing;
     return html`
-      ${!user.system_generated
-        ? html`
-            <ha-settings-row>
-              <span slot="heading">
-                ${this.hass.localize("ui.panel.config.person.detail.username")}
-              </span>
-              <span slot="description">${user.username}</span>
-              ${this.hass.user?.is_owner
-                ? html`
-                    <ha-icon-button
-                      .path=${mdiPencil}
-                      @click=${this._changeUsername}
-                      .label=${this.hass.localize(
-                        "ui.panel.config.person.detail.change_username"
-                      )}
-                    ></ha-icon-button>
-                  `
-                : nothing}
-            </ha-settings-row>
-          `
-        : nothing}
-      ${!user.system_generated && this.hass.user?.is_owner
-        ? html`
-            <ha-settings-row>
-              <span slot="heading">
-                ${this.hass.localize("ui.panel.config.person.detail.password")}
-              </span>
-              <span slot="description">************</span>
-              ${this.hass.user?.is_owner
-                ? html`
-                    <ha-icon-button
-                      .path=${mdiPencil}
-                      @click=${this._changePassword}
-                      .label=${this.hass.localize(
-                        "ui.panel.config.person.detail.change_password"
-                      )}
-                    ></ha-icon-button>
-                  `
-                : nothing}
-            </ha-settings-row>
-          `
-        : nothing}
       <ha-settings-row>
         <span slot="heading">
           ${this.hass.localize(
